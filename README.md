@@ -34,6 +34,7 @@ config file directory:
 
 -   Windows: `%USERPROFILE%/redis-viewer.yml`
 -   Linux: `~/.config/redis-viewer/redis-viewer.yml`
+-   via command argument: `redis-viewer --config redis-config.yaml`
 
 example config file:
 

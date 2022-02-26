@@ -6,6 +6,8 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -34,25 +36,33 @@ type Config struct {
 }
 
 // LoadConfig loads a users config and creates the config if it does not exist.
-func LoadConfig() {
-	if runtime.GOOS != "windows" {
-		homeDir, err := util.GetHomeDirectory()
-		if err != nil {
-			log.Fatal(err)
+func LoadConfig(cfgFile string) {
+	if cfgFile != "" {
+		if _, err := os.Stat(cfgFile); errors.Is(err, os.ErrNotExist) {
+			log.Fatal(fmt.Sprintf("File %s not exists", cfgFile))
 		}
 
-		err = util.CreateDirectory(filepath.Join(homeDir, ".config", "redis-viewer"))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		viper.AddConfigPath("$HOME/.config/redis-viewer")
+		viper.SetConfigFile(cfgFile)
 	} else {
-		viper.AddConfigPath("$HOME")
-	}
+		if runtime.GOOS != "windows" {
+			homeDir, err := util.GetHomeDirectory()
+			if err != nil {
+				log.Fatal(err)
+			}
 
-	viper.SetConfigName("redis-viewer")
-	viper.SetConfigType("yml")
+			err = util.CreateDirectory(filepath.Join(homeDir, ".config", "redis-viewer"))
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			viper.AddConfigPath("$HOME/.config/redis-viewer")
+		} else {
+			viper.AddConfigPath("$HOME")
+		}
+
+		viper.SetConfigName("redis-viewer")
+		viper.SetConfigType("yml")
+	}
 
 	viper.SetDefault("mode", "client")
 	viper.SetDefault("count", 20)

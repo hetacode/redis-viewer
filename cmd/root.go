@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"runtime"
 
 	"github.com/SaltFishPr/redis-viewer/internal/config"
 	"github.com/SaltFishPr/redis-viewer/internal/tui"
@@ -13,13 +14,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var cfgFile string
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "redis-viewer",
 	Short: "view redis data in terminal.",
 	Long:  `Redis Viewer is a tool to view redis data in terminal.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		config.LoadConfig()
+		config.LoadConfig(cfgFile)
 		cfg := config.GetConfig()
 
 		var rdb *redis.Client
@@ -67,10 +70,9 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.redis-viewer.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	configInfo := "config file (default is $HOME/.config/redis-viewer/redis-viewer.yaml)"
+	if runtime.GOOS == "windows" {
+		configInfo = "config file (default is $HOME/.redis-viewer.yaml)"
+	}
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", configInfo)
 }
